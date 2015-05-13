@@ -17,8 +17,10 @@ L.GridLayer = L.Layer.extend({
 		zIndex: null,
 		bounds: null,
 
-		minZoom: 0
+		minZoom: 0,
 		// maxZoom: <Number>
+
+		maxTileAgeMsBeforeRefresh: -1
 	},
 
 	initialize: function (options) {

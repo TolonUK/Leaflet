@@ -60,11 +60,17 @@ L.TileLayer.WMS = L.TileLayer.extend({
 			    [se.y, nw.x, nw.y, se.x] :
 			    [nw.x, se.y, se.x, nw.y]).join(','),
 
-		    url = L.TileLayer.prototype.getTileUrl.call(this, coords);
+		    url = L.TileLayer.prototype.getTileUrl.call(this, coords) +
+				L.Util.getParamString(this.wmsParams, url, this.options.uppercase) +
+				(this.options.uppercase ? '&BBOX=' : '&bbox=') + bbox;
 
-		return url +
-			L.Util.getParamString(this.wmsParams, url, this.options.uppercase) +
-			(this.options.uppercase ? '&BBOX=' : '&bbox=') + bbox;
+		if (!(this.options.maxTileAgeMsBeforeRefresh < 0)) {
+			var epoch = new Date().getTime();
+			if (this.options.maxTileAgeMsBeforeRefresh > 0) { epoch = Math.round(epoch / this.options.maxTileAgeMsBeforeRefresh); }
+			url += '&refreshtime=' + epoch;
+		}
+
+		return url;
 	},
 
 	setParams: function (params, noRedraw) {
