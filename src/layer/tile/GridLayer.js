@@ -421,7 +421,9 @@ L.GridLayer = L.Layer.extend({
 				var tile = this._tiles[this._tileCoordsToKey(coords)];
 				if (tile) {
 					tile.current = true;
-				} else {
+				}
+
+				if (!tile || this._isTileStale(tile)) {
 					queue.push(coords);
 				}
 			}
@@ -465,6 +467,16 @@ L.GridLayer = L.Layer.extend({
 		// don't load tile if it doesn't intersect the bounds in options
 		var tileBounds = this._tileCoordsToBounds(coords);
 		return L.latLngBounds(this.options.bounds).intersects(tileBounds);
+	},
+
+	_isTileStale: function (tile) {
+		if (this.options.maxTileAgeMsBeforeRefresh < 0) {
+			return false;
+		} else {
+			// separate out the now date from the calculation of whether the tile is still fresh
+			var now = +new Date();
+			return tile.loaded + this.options.maxTileAgeMsBeforeRefresh < now;
+		}
 	},
 
 	_keyToBounds: function (key) {
