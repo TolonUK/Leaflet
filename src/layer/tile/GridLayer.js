@@ -31,6 +31,7 @@ L.GridLayer = L.Layer.extend({
 		this._initContainer();
 
 		this._levels = {};
+		this._oldTiles = {};
 		this._tiles = {};
 
 		this._viewReset();
@@ -175,6 +176,7 @@ L.GridLayer = L.Layer.extend({
 				L.DomUtil.setOpacity(tile.el, opacity);
 				tile.active = true;
 				this._pruneTiles();
+				this._removeOldTiles(key);
 			}
 		}
 
@@ -511,6 +513,25 @@ L.GridLayer = L.Layer.extend({
 		return coords;
 	},
 
+	_removeOldTiles: function(key) {
+		var newOldTiles = [];
+
+		if (this._oldTiles[key]) {
+			var epochThreshold = 1000 + (new Date().getTime());
+
+			this._oldTiles[key].forEach(function removeOldTile(oldTile) {
+				if (oldTile.loaded !== 0 && oldTile.loaded < epochThreshold) {
+					L.DomUtil.remove(oldTile.el);
+				} else {
+					newOldTiles.push(oldTile);
+				}
+			});
+
+			delete this._oldTiles[key];
+			this._oldTiles[key] = newOldTiles;
+		}
+	},
+
 	_removeTile: function (key) {
 		var tile = this._tiles[key];
 		if (!tile) { return; }
@@ -565,12 +586,20 @@ L.GridLayer = L.Layer.extend({
 		// which is slow, and it also fixes gaps between tiles in Safari
 		L.DomUtil.setPosition(tile, tilePos, true);
 
+		// remember old tile so we can dispose of it later
+		var oldTile = this._tiles[key];
+
 		// save tile in cache
 		this._tiles[key] = {
 			el: tile,
 			coords: coords,
 			current: true
 		};
+
+		if (oldTile) {
+			if (!this._oldTiles[key]) { this._oldTiles[key] = []; }
+			this._oldTiles[key].push(oldTile);
+		}
 
 		container.appendChild(tile);
 		this.fire('tileloadstart', {
