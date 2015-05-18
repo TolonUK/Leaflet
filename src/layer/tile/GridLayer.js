@@ -20,7 +20,9 @@ L.GridLayer = L.Layer.extend({
 		minZoom: 0,
 		// maxZoom: <Number>
 
-		maxTileAgeMsBeforeRefresh: -1
+		maxTileAgeMsBeforeRefresh: -1,
+
+		edgeBuffer: 0
 	},
 
 	initialize: function (options) {
@@ -407,6 +409,11 @@ L.GridLayer = L.Layer.extend({
 			tileRange = this._pxBoundsToTileRange(pixelBounds),
 			tileCenter = tileRange.getCenter(),
 			queue = [];
+
+		// add buffer to tileRange so that we cache some off-screen tiles.
+		if (this.options.edgeBuffer > 0) {
+			tileRange = new L.Bounds(tileRange.min.subtract([this.options.edgeBuffer, this.options.edgeBuffer]), tileRange.max.add([this.options.edgeBuffer, this.options.edgeBuffer]));
+		}
 
 		for (var key in this._tiles) {
 			this._tiles[key].current = false;
