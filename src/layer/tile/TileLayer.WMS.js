@@ -66,7 +66,7 @@ L.TileLayer.WMS = L.TileLayer.extend({
 
 		if (!(this.options.maxTileAgeMsBeforeRefresh < 0)) {
 			var epoch = new Date().getTime();
-			if (this.options.maxTileAgeMsBeforeRefresh > 0) { epoch = Math.floor(epoch / this.options.maxTileAgeMsBeforeRefresh) * this.maxTileAgeMsBeforeRefresh; }
+			if (this.options.maxTileAgeMsBeforeRefresh > 0) { epoch = Math.floor(epoch / this.options.maxTileAgeMsBeforeRefresh) * this.options.maxTileAgeMsBeforeRefresh; }
 			url += '&refreshtime=' + epoch;
 		}
 
