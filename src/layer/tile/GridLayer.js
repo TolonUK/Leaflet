@@ -405,15 +405,17 @@ L.GridLayer = L.Layer.extend({
 		if (center === undefined) { center = map.getCenter(); }
 		if (zoom === undefined) { zoom = Math.round(map.getZoom()); }
 
-		var pixelBounds = map.getPixelBounds(center, zoom),
-			tileRange = this._pxBoundsToTileRange(pixelBounds),
+		var pixelBounds = map.getPixelBounds(center, zoom);
+
+		// add buffer so that we cache some off-screen tiles.
+		if (this.options.edgeBuffer > 0) {
+			var pixelEdgeBuffer = this.options.edgeBuffer * this._getTileSize();
+			pixelBounds = new L.Bounds(pixelBounds.min.subtract([pixelEdgeBuffer, pixelEdgeBuffer]), pixelBounds.max.add([pixelEdgeBuffer, pixelEdgeBuffer]));
+		}
+
+		var	tileRange = this._pxBoundsToTileRange(pixelBounds),
 			tileCenter = tileRange.getCenter(),
 			queue = [];
-
-		// add buffer to tileRange so that we cache some off-screen tiles.
-		if (this.options.edgeBuffer > 0) {
-			tileRange = new L.Bounds(tileRange.min.subtract([this.options.edgeBuffer, this.options.edgeBuffer]), tileRange.max.add([this.options.edgeBuffer, this.options.edgeBuffer]));
-		}
 
 		for (var key in this._tiles) {
 			this._tiles[key].current = false;
