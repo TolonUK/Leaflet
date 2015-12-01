@@ -51,20 +51,20 @@ describe('GridLayer', function () {
 
 		for (var i = 0; i < tiles.length; i++) {
 			var coords = tiles[i].coords,
-				pos = L.DomUtil.getPosition(tiles[i].tile);
+			    pos = L.DomUtil.getPosition(tiles[i].tile);
 
 			loaded[pos.x + ':' + pos.y] = [coords.x, coords.y];
 		}
 
 		expect(loaded).to.eql({
-			'144:44': [0, 0],
-			'400:44': [1, 0],
-			'144:300': [0, 1],
-			'400:300': [1, 1],
-			'-112:44': [1, 0],
-			'656:44': [0, 0],
-			'-112:300': [1, 1],
-			'656:300': [0, 1]
+			'144:0': [0, 0],
+			'400:0': [1, 0],
+			'144:256': [0, 1],
+			'400:256': [1, 1],
+			'-112:0': [1, 0],
+			'656:0': [0, 0],
+			'-112:256': [1, 1],
+			'656:256': [0, 1]
 		});
 	});
 
@@ -106,19 +106,61 @@ describe('GridLayer', function () {
 		});
 	});
 
+	describe('#createTile', function () {
+
+		beforeEach(function () {
+			// Simpler sizes to test.
+			div.style.width = '512px';
+			div.style.height = '512px';
+		});
+
+		afterEach(function () {
+			div.style.width = '800px';
+			div.style.height = '600px';
+		});
+
+		// Passes on Firefox, but fails on phantomJS: done is never called.
+		xit('only creates tiles for visible area on zoom in', function (done) {
+			map.remove();
+			map = L.map(div);
+			map.setView([0, 0], 10);
+
+			var grid = L.gridLayer(),
+			    count = 0,
+			    loadCount = 0;
+			grid.createTile = function (coords) {
+				count++;
+				return document.createElement('div');
+			};
+			var onLoad = function (e) {
+				expect(count).to.eql(4);
+				count = 0;
+				loadCount++;
+				if (loadCount === 1) {  // On layer add.
+					map.zoomIn();
+				} else {  // On zoom in.
+					done();
+				}
+			};
+			grid.on('load', onLoad);
+			map.addLayer(grid);
+		});
+
+	});
+
 	describe("#onAdd", function () {
-		it('is called after viewreset on first map load', function () {
+		it('is called after zoomend on first map load', function () {
 			var layer = L.gridLayer().addTo(map);
 
 			var onAdd = layer.onAdd,
-				onAddSpy = sinon.spy();
+			    onAddSpy = sinon.spy();
 			layer.onAdd = function () {
 				onAdd.apply(this, arguments);
 				onAddSpy();
 			};
 
 			var onReset = sinon.spy();
-			map.on('viewreset', onReset);
+			map.on('zoomend', onReset);
 			map.setView([0, 0], 0);
 
 			expect(onReset.calledBefore(onAddSpy)).to.be.ok();
@@ -129,7 +171,7 @@ describe('GridLayer', function () {
 		describe("when a tilelayer is added to a map with no other layers", function () {
 			it("has the same zoomlevels as the tilelayer", function () {
 				var maxZoom = 10,
-					minZoom = 5;
+				    minZoom = 5;
 
 				map.setView([0, 0], 1);
 

@@ -1,4 +1,5 @@
 describe("L.GeoJSON", function () {
+
 	describe("addData", function () {
 		var geoJSON = {
 			type: 'Feature',
@@ -7,6 +8,10 @@ describe("L.GeoJSON", function () {
 				type: 'Point',
 				coordinates: [20, 10, 5]
 			}
+		}, geoJSONEmpty = {
+			type: 'Feature',
+			properties: {},
+			geometry: null
 		};
 
 		it("sets feature property on member layers", function () {
@@ -20,7 +25,36 @@ describe("L.GeoJSON", function () {
 			layer.addData(geoJSON.geometry);
 			expect(layer.getLayers()[0].feature).to.eql(geoJSON);
 		});
+
+		it("accepts geojson with null geometry", function () {
+			var layer = new L.GeoJSON();
+			layer.addData(geoJSONEmpty);
+			expect(layer.getLayers().length).to.eql(0);
+		});
 	});
+
+	describe('resetStyle', function () {
+
+		it('should reset init options', function () {
+			var feature = {
+				type: 'Feature',
+				geometry: {
+					type: 'LineString',
+					coordinates:[[-2.35, 51.38], [-2.38, 51.38]]
+				}
+			};
+			var geojson = L.geoJson(feature, {weight: 7, color: 'chocolate'});
+			geojson.setStyle({weight: 22, color: 'coral'});
+			var layer = geojson.getLayers()[0];
+			expect(layer.options.weight).to.be(22);
+			expect(layer.options.color).to.be('coral');
+			geojson.resetStyle(layer);
+			expect(layer.options.weight).to.be(7);
+			expect(layer.options.color).to.be('chocolate');
+		});
+
+	});
+
 });
 
 describe("L.Marker#toGeoJSON", function () {
@@ -237,8 +271,8 @@ describe("L.LayerGroup#toGeoJSON", function () {
 
 	it("returns a 3D FeatureCollection object", function () {
 		var marker = new L.Marker([10, 20, 30]),
-				polyline = new L.Polyline([[10, 20, 30], [2, 5, 10]]),
-				layerGroup = new L.LayerGroup([marker, polyline]);
+		    polyline = new L.Polyline([[10, 20, 30], [2, 5, 10]]),
+		    layerGroup = new L.LayerGroup([marker, polyline]);
 		expect(layerGroup.toGeoJSON()).to.eql({
 			type: 'FeatureCollection',
 			features: [marker.toGeoJSON(), polyline.toGeoJSON()]

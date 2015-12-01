@@ -30,7 +30,7 @@ L.Map.Keyboard = L.Handler.extend({
 		var container = this._map._container;
 
 		// make the container focusable by tabbing
-		if (container.tabIndex === -1) {
+		if (container.tabIndex <= 0) {
 			container.tabIndex = '0';
 		}
 
@@ -128,13 +128,19 @@ L.Map.Keyboard = L.Handler.extend({
 		if (e.altKey || e.ctrlKey || e.metaKey) { return; }
 
 		var key = e.keyCode,
-		    map = this._map;
+		    map = this._map,
+		    offset;
 
 		if (key in this._panKeys) {
 
 			if (map._panAnim && map._panAnim._inProgress) { return; }
 
-			map.panBy(this._panKeys[key]);
+			offset = this._panKeys[key];
+			if (e.shiftKey) {
+				offset = L.point(offset).multiplyBy(3);
+			}
+
+			map.panBy(offset);
 
 			if (map.options.maxBounds) {
 				map.panInsideBounds(map.options.maxBounds);
