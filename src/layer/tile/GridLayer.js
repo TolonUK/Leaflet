@@ -464,8 +464,8 @@ L.GridLayer = L.Layer.extend({
 		}
 
 		var	tileRange = this._pxBoundsToTileRange(pixelBounds),
-			tileCenter = tileRange.getCenter(),
-			queue = [];
+		tileCenter = tileRange.getCenter(),
+		queue = [];
 
 		for (var key in this._tiles) {
 			this._tiles[key].current = false;
@@ -576,7 +576,7 @@ L.GridLayer = L.Layer.extend({
 		return coords;
 	},
 
-	_removeOldTiles: function(key) {
+	_removeOldTiles: function (key) {
 		var newOldTiles = [];
 
 		if (this._oldTiles[key]) {
