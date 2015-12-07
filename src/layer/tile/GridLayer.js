@@ -459,8 +459,9 @@ L.GridLayer = L.Layer.extend({
 
 		// add buffer so that we cache some off-screen tiles.
 		if (this.options.edgeBuffer > 0) {
-			var pixelEdgeBuffer = this.options.edgeBuffer * this._getTileSize();
-			pixelBounds = new L.Bounds(pixelBounds.min.subtract([pixelEdgeBuffer, pixelEdgeBuffer]), pixelBounds.max.add([pixelEdgeBuffer, pixelEdgeBuffer]));
+			var pixelEdgeBufferX = this.options.edgeBuffer * this._tileSize.x;
+			var pixelEdgeBufferY = this.options.edgeBuffer * this._tileSize.y;
+			pixelBounds = new L.Bounds(pixelBounds.min.subtract([pixelEdgeBufferX, pixelEdgeBufferY]), pixelBounds.max.add([pixelEdgeBufferX, pixelEdgeBufferY]));
 		}
 
 		var	tileRange = this._pxBoundsToTileRange(pixelBounds),
